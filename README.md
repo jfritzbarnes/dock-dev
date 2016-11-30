@@ -1,10 +1,10 @@
-Simple development environment for node
+simple development environment for node
 
 # contents
 
 * based on node image
 * simple dev utilities: less, vim, jq (json processor), httpie
-* AWS cli utilities
+* aws cli utilities
 
 # build
 
