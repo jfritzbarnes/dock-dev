@@ -8,5 +8,11 @@ RUN     apt-get install -y less man vim jq httpie
 RUN     apt-get install -y python python-pip python-virtualenv python-dev
 RUN     pip install awscli
 
+# setup angular development; allow for optional local npm registry
+ARG     REGISTRY=registry.npmjs.org
+RUN     npm set registry http://${REGISTRY}:4873
+RUN     npm install -g angular-cli
+RUN     npm set registry http://registry:4873/
+
 WORKDIR /devel
 
