@@ -1,4 +1,4 @@
-simple development environment for node
+> simple development environment for node
 
 # contents
 
@@ -6,6 +6,14 @@ simple development environment for node
 * simple dev utilities: less, vim, jq (json processor), httpie
 * aws cli utilities
 
+# running an environment
+
+uses docker secrets for providing aws credentials to the image, docker swarm required
+typical execution:
+
+```sh
+$ docker service create --name devel --network devel --secret aws.config --secret aws.credentials jfritzbarnes/devel:latest
+```
 # build
 
 ```sh
