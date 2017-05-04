@@ -12,7 +12,9 @@ uses docker secrets for providing aws credentials to the image, docker swarm req
 typical execution:
 
 ```sh
-$ docker service create --name devel --network devel --secret aws.config --secret aws.credentials jfritzbarnes/devel:latest
+$ docker service create --name devel --network devel \
+                        --secret aws.config --secret aws.credentials \
+                        jfritzbarnes/devel:latest
 ```
 # build
 

@@ -8,9 +8,8 @@ RUN     apt-get install -y less man vim jq httpie
 RUN     apt-get install -y python python-pip python-virtualenv python-dev
 RUN     pip install awscli
 # create symbolic links; requires use of secrets
-RUN     mkdir ~/.aws && \
-        ln -s /run/secrets/aws.config ~/.aws/config && \
-        ln -s /run/secrets/aws.credentials ~/.aws/credentials
+ENV     AWS_CONFIG_FILE=/run/secrets/aws.config
+ENV     AWS_SHARED_CREDENTIALS_FILE=/run/secrets/aws.credentials
 
 # setup angular development; allow for optional local npm registry
 ARG     REGISTRY=registry.npmjs.org
