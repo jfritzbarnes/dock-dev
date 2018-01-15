@@ -16,7 +16,6 @@ RUN     mkdir ~/.aws && \
 ARG     REGISTRY=registry.npmjs.org
 RUN     npm set registry http://${REGISTRY}/
 RUN     npm install -g @angular/cli
-RUN     npm set registry http://registry:4873/
 
 WORKDIR /devel
 CMD     exec /bin/bash -c "trap : TERM INT; sleep infinity & wait"
