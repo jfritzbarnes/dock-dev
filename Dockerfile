@@ -2,7 +2,7 @@ FROM    node:8.9.4
 
 # setup to install basic development environment
 RUN     apt-get update && apt-get upgrade -y
-RUN     apt-get install -y locales locales-all less man vim jq httpie
+RUN     apt-get install -y locales locales-all less man vim jq httpie zip rsync
 
 # set to swedish :)
 ENV     LC_ALL=sv_SE.UTF-8
