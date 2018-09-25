@@ -1,8 +1,8 @@
-FROM    node:8.9.4
+FROM    node:8.12.0
 
 # setup to install basic development environment
 RUN     apt-get update && apt-get upgrade -y
-RUN     apt-get install -y locales locales-all less man vim jq httpie zip rsync
+RUN     apt-get install -y locales locales-all less man vim jq zip rsync
 
 # set to swedish :)
 ENV     LC_ALL=sv_SE.UTF-8
@@ -16,6 +16,9 @@ RUN     pip install awscli
 RUN     mkdir ~/.aws && \
         ln -s /run/secrets/aws.config ~/.aws/config && \
         ln -s /run/secrets/aws.credentials ~/.aws/credentials
+
+# install httpie after AWS since it also uses python/pip
+RUN     pip install httpie
 
 # setup angular development; allow for optional local npm registry
 #ARG     REGISTRY=registry.npmjs.org
