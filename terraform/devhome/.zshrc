@@ -2,7 +2,7 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # set to vi mode first
-#bindkey -v
+bindkey -v
 
 # Path to your oh-my-zsh installation.
 export ZSH="/home/dev/.oh-my-zsh"
@@ -71,7 +71,7 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git per-directory-history vi-mode)
+plugins=(git per-directory-history)
 
 source $ZSH/oh-my-zsh.sh
 
