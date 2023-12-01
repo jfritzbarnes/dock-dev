@@ -36,7 +36,7 @@ ENV	LANGUAGE=sv_SE.UTF-8
 # copy krypton
 COPY	--from=krbuild /go/src/github.com/kryptco/kr/bin/ /usr/bin/
 
-RUN	userdel node && useradd -ms /bin/zsh -ou 1000 dev
+RUN	userdel node && useradd -ms /bin/zsh -ou 501 dev
 USER	dev
 WORKDIR /home/dev
 
