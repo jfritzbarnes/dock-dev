@@ -3,10 +3,12 @@ RUN	go get github.com/kryptco/kr ; echo 'ignore go install warning'
 WORKDIR	/go/src/github.com/kryptco/kr
 RUN	make all
 
-FROM	golang:1.19-bullseye
+FROM	golang:1.23-bookworm
 
 RUN	apt update && apt install -y \
+		awscli \
 		curl \
+		httpie \
 		jq \
 		less \
 		locales \
@@ -15,13 +17,12 @@ RUN	apt update && apt install -y \
 		neovim \
 		python3 \
 		python3-pip \
+		python3-pynvim \
 		rsync \
 		silversearcher-ag \
 		tmux \
 		zip \
-		zsh \
-	&& rm -rf /var/lib/apt/lists/*
-RUN	pip3 install pynvim awscli httpie
+		zsh
 
 # copy krypton
 COPY --from=krbuild /go/src/github.com/kryptco/kr/bin/ /usr/bin/

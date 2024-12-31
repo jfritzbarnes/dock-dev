@@ -1,0 +1,47 @@
+docker:=$(shell which podman)
+ifneq (${docker},)
+  repo:=jfritzbarnes
+  tag:=$(shell date +'%Y%m%d.%H%M')
+  prev_image:=$(shell podman images | grep ${repo} | awk '{print $$2}' | head -1)
+endif
+
+dbuild:
+	podman build . -t ${repo}:${tag}
+	podman tag ${repo}:${tag} ${repo}:latest
+
+dpush:
+	podman push ${repo}:${prev_image}
+
+gobuild:
+	podman build ./golang -t ${repo}/devgo:${tag}
+	podman tag ${repo}/devgo:${tag} ${repo}/devgo:latest
+
+nodebuild:
+	podman build ./node -t ${repo}/devnode:${tag}
+	podman tag ${repo}/devnode:${tag} ${repo}/devnode:latest
+
+scalabuild:
+	podman build ./scala -t ${repo}/devscala:${tag}
+	podman tag ${repo}/devscala:${tag} ${repo}/devscala:latest
+
+tfbuild:
+	podman build ./terraform -t ${repo}/devtf:${tag}
+	podman tag ${repo}/devtf:${tag} ${repo}/devtf:latest
+
+pythonbuild:
+	podman build ./python -t ${repo}/devpython:${tag}
+	podman tag ${repo}/devpython:${tag} ${repo}/devpython:latest
+
+clean:
+	podman images | grep ${repo}/devgo | awk '{print $2}' | tail -n +3 | \
+		xargs -n 1 printf '${repo}/devgo:%s\n' | xargs -n 1 podman rmi
+	podman images | grep ${repo}/devnode | awk '{print $2}' | tail -n +3 | \
+		xargs -n 1 printf '${repo}/devnode:%s\n' | xargs -n 1 podman rmi
+	podman images | grep ${repo}/devscala | awk '{print $2}' | tail -n +3 | \
+		xargs -n 1 printf '${repo}/devscala:%s\n' | xargs -n 1 podman rmi
+	podman images | grep ${repo}/devtf | awk '{print $2}' | tail -n +3 | \
+		xargs -n 1 printf '${repo}/devtf:%s\n' | xargs -n 1 podman rmi
+	podman images | grep ${repo}/devpython | awk '{print $2}' | tail -n +3 | \
+		xargs -n 1 printf '${repo}/devpython:%s\n' | xargs -n 1 podman rmi
+
+.PHONY: dbuild dpush clean gobuild nodebuild scalabuild tfbuild pythonbuild
