@@ -10,7 +10,7 @@ ARG TARGETARCH
 # ---- Basverktyg ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl wget gnupg lsb-release \
-    git vim less unzip zip \
+    git neovim zsh less unzip zip \
     build-essential make pkg-config \
     openssh-client \
     python3 python3-pip python3-venv \
@@ -98,14 +98,31 @@ RUN set -eux; \
       useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME}; \
     fi; \
     mkdir -p /workspace; \
-    chown -R ${USER_UID}:${USER_GID} /workspace
+    chown -R ${USER_UID}:${USER_GID} /workspace; \
+    usermod --shell /usr/bin/zsh ${USERNAME}
 
 WORKDIR /workspace
 USER ${USERNAME}
+
+# ---- Oh My Zsh + Powerlevel10k ----
+RUN set -eux; \
+    git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "${HOME}/.oh-my-zsh"; \
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${HOME}/.oh-my-zsh/custom/themes/powerlevel10k"; \
+    cp "${HOME}/.oh-my-zsh/templates/zshrc.zsh-template" "${HOME}/.zshrc"; \
+    sed -i 's|^ZSH_THEME=.*|ZSH_THEME="powerlevel10k/powerlevel10k"|' "${HOME}/.zshrc"; \
+    printf '\n[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh\n' >> "${HOME}/.zshrc"; \
+    cat > "${HOME}/.p10k.zsh" <<'EOF'
+# Minimal Powerlevel10k config for container shells.
+typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context dir vcs prompt_char)
+typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status command_execution_time time)
+typeset -g POWERLEVEL9K_ALWAYS_SHOW_CONTEXT=true
+typeset -g POWERLEVEL9K_CONTEXT_TEMPLATE='%n@%m'
+typeset -g POWERLEVEL9K_DIR_FOREGROUND=45
+EOF
 
 # Lite default ergonomi
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-CMD ["/bin/bash"]
+CMD ["/usr/bin/zsh", "-l"]
