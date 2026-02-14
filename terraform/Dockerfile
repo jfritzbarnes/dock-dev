@@ -1,8 +1,12 @@
-FROM	hashicorp/terraform:0.15.3 as terraform
+FROM	hashicorp/terraform:1.9.2 as terraform
 
-FROM	node:12.18.0-buster
+FROM	node:22-bookworm
 
 RUN	apt update && apt install -y \
+                awscli \
+                azure-cli \
+                curl \
+                httpie \
                 jq \
                 less \
                 locales \
@@ -10,11 +14,11 @@ RUN	apt update && apt install -y \
                 man \
                 python3 \
                 python3-pip \
+                python3-pynvim \
                 rsync \
                 zip \
                 zsh \
         && rm -rf /var/lib/apt/lists/*
-RUN     pip3 install pynvim httpie awscli
 
 # set to swedish
 ENV	LC_ALL=sv_SE.UTF-8

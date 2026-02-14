@@ -1,9 +1,9 @@
-FROM	golang:1.14.3-buster AS krbuild
+FROM	golang:1.14.3-trixie AS krbuild
 RUN	go get github.com/kryptco/kr ; echo 'ignore go install warning'
 WORKDIR	/go/src/github.com/kryptco/kr
 RUN	make all
 
-FROM	python:3.9.0-buster
+FROM	python:3.15-trixie
 RUN	apt update && apt install -y \
 		jq \
 		less \
