@@ -5,6 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG USERNAME=dev
 ARG USER_UID=1001
 ARG USER_GID=1001
+ARG TARGETARCH
 
 # ---- Basverktyg ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -13,9 +14,35 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential make pkg-config \
     openssh-client \
     python3 python3-pip python3-venv \
+    jq httpie silversearcher-ag \
     golang-go \
     openjdk-17-jdk \
     && rm -rf /var/lib/apt/lists/*
+
+# ---- Azure CLI (via Microsoft apt repo) ----
+RUN set -eux; \
+    install -m 0755 -d /etc/apt/keyrings; \
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg; \
+    chmod go+r /etc/apt/keyrings/microsoft.gpg; \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" \
+      > /etc/apt/sources.list.d/azure-cli.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends azure-cli; \
+    rm -rf /var/lib/apt/lists/*; \
+    az version
+
+# ---- AWS CLI v2 (official installer, multi-arch) ----
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      "amd64") AWS_ARCH="x86_64" ;; \
+      "arm64") AWS_ARCH="aarch64" ;; \
+      *) echo "Unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
+    esac; \
+    curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-${AWS_ARCH}.zip" -o /tmp/awscliv2.zip; \
+    unzip -q /tmp/awscliv2.zip -d /tmp; \
+    /tmp/aws/install; \
+    rm -rf /tmp/aws /tmp/awscliv2.zip; \
+    aws --version
 
 # ---- Node.js (via NodeSource) ----
 # (Ubuntu 24.04 kan ligga efter i apt; NodeSource ger modern LTS)
@@ -38,7 +65,6 @@ RUN set -eux; \
     terraform -version
 
 # ---- Scala + sbt via Coursier (multi-arch, raw/master) ----
-ARG TARGETARCH
 ENV COURSIER_HOME=/opt/coursier
 ENV PATH="${COURSIER_HOME}/bin:${PATH}"
 
@@ -83,4 +109,3 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PYTHONUNBUFFERED=1
 
 CMD ["/bin/bash"]
-
