@@ -65,20 +65,23 @@ RUN set -eux; \
     terraform -version
 
 # ---- Scala + sbt via Coursier (multi-arch, raw/master) ----
-ENV COURSIER_HOME=/opt/coursier
-ENV PATH="${COURSIER_HOME}/bin:${PATH}"
+  ENV COURSIER_HOME=/opt/coursier
+  ENV COURSIER_CACHE=/opt/coursier/cache
+  ENV PATH="${COURSIER_HOME}/bin:${PATH}"
 
-RUN set -eux; \
-    case "${TARGETARCH}" in \
-      "amd64") CS_URL="https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz" ;; \
-      "arm64") CS_URL="https://github.com/coursier/launchers/raw/master/cs-aarch64-pc-linux.gz" ;; \
-      *) echo "Unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
-    esac; \
-    curl -fsSL "${CS_URL}" | gunzip -c > /usr/local/bin/cs; \
-    chmod +x /usr/local/bin/cs; \
-    mkdir -p "${COURSIER_HOME}/bin"; \
-    COURSIER_NO_PROMPT=1 cs install scala sbt --install-dir "${COURSIER_HOME}/bin"; \
-    scala -version; sbt --version
+  RUN set -eux; \
+      case "${TARGETARCH}" in \
+        "amd64") CS_URL="https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz" ;; \
+        "arm64") CS_URL="https://github.com/coursier/launchers/raw/master/cs-aarch64-pc-linux.gz" ;; \
+        *) echo "Unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
+      esac; \
+      curl -fsSL "${CS_URL}" | gunzip -c > /usr/local/bin/cs; \
+      chmod +x /usr/local/bin/cs; \
+      mkdir -p "${COURSIER_HOME}/bin" "${COURSIER_CACHE}"; \
+      COURSIER_NO_PROMPT=1 cs install scala sbt --install-dir "${COURSIER_HOME}/bin"; \
+      chmod -R a+rX "${COURSIER_HOME}"; \
+      scala -version; sbt --version
+
 
 # ---- Codex CLI (OpenAI) ----
 # Officiell installation: npm i -g @openai/codex och kör "codex"
@@ -101,8 +104,23 @@ RUN set -eux; \
     chown -R ${USER_UID}:${USER_GID} /workspace; \
     usermod --shell /usr/bin/zsh ${USERNAME}
 
+# Gör coursier-installationsplatsen global men skrivbar vid behov
+ENV COURSIER_HOME=/opt/coursier
+ENV PATH="${COURSIER_HOME}/bin:${PATH}"
+RUN mkdir -p "${COURSIER_HOME}/bin" "${COURSIER_HOME}/cache" \
+ && chown -R ${USER_UID}:${USER_GID} "${COURSIER_HOME}"
+
 WORKDIR /workspace
 USER ${USERNAME}
+
+ENV HOME=/home/${USERNAME}
+ENV COURSIER_CACHE=${HOME}/.cache/coursier
+
+RUN mkdir -p "${COURSIER_CACHE}" "${HOME}/.ivy2" "${HOME}/.sbt"
+
+# Installera scala+sbt (launchers i /opt/coursier/bin men cache i /home/dev/.cache/coursier)
+RUN COURSIER_NO_PROMPT=1 cs install scala sbt --install-dir "${COURSIER_HOME}/bin" \
+ && scala -version && sbt --script-version || true
 
 # ---- Oh My Zsh + Powerlevel10k ----
 RUN set -eux; \
