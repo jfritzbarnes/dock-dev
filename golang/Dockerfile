@@ -3,11 +3,13 @@ RUN	go get github.com/kryptco/kr ; echo 'ignore go install warning'
 WORKDIR	/go/src/github.com/kryptco/kr
 RUN	make all
 
-FROM	golang:1.23-bookworm
+FROM	golang:1.26-trixie
 
 RUN	apt update && apt install -y \
 		awscli \
+		ca-certificates \
 		curl \
+		gnupg \
 		httpie \
 		jq \
 		less \
@@ -34,10 +36,15 @@ ENV	LANGUAGE=sv_SE.UTF-8
 
 # install node for vim + nvim
 WORKDIR /usr/local
-RUN	curl -sL install-node.now.sh/lts > /tmp/node.sh && \
-	chmod u+x /tmp/node.sh && \
-	/tmp/node.sh --yes && \
-	npm install --global yarn
+RUN	set -eux; \
+	curl -fsSL https://deb.nodesource.com/setup_24.x | bash -; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends nodejs; \
+	rm -rf /var/lib/apt/lists/*; \
+	npm install --global yarn; \
+	node --version; \
+	npm --version; \
+	yarn --version
 
 #	curl -LO https://github.com/neovim/neovim/releases/download/stable/nvim.appimage && \
 #	chmod u+x nvim.appimage && \
@@ -54,6 +61,6 @@ RUN	git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ./.oh-my-zs
 
 RUN	curl -fLo /home/dev/.local/share/nvim/site/autoload/plug.vim --create-dirs \
 		https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim && \
-	/usr/bin/nvim +PlugInstal +UpdateRemotePlugins +qall
+	/usr/bin/nvim +PlugInstall +UpdateRemotePlugins +qall
 
 CMD	zsh

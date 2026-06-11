@@ -3,9 +3,14 @@ RUN	go get github.com/kryptco/kr ; echo 'ignore go install warning'
 WORKDIR	/go/src/github.com/kryptco/kr
 RUN	make all
 
-FROM	golang:1.14.3-buster
+FROM	golang:1.26-trixie
 
 RUN	apt update && apt install -y \
+		awscli \
+		ca-certificates \
+		curl \
+		git \
+		httpie \
 		jq \
 		less \
 		locales \
@@ -13,12 +18,12 @@ RUN	apt update && apt install -y \
 		man \
 		python3 \
 		python3-pip \
+		python3-pynvim \
 		rsync \
 		silversearcher-ag \
 		zip \
 		zsh \
 	&& rm -rf /var/lib/apt/lists/*
-RUN	pip3 install pynvim awscli httpie
 
 # copy krypton
 COPY --from=krbuild /go/src/github.com/kryptco/kr/bin/ /usr/bin/
@@ -27,17 +32,6 @@ COPY --from=krbuild /go/src/github.com/kryptco/kr/bin/ /usr/bin/
 ENV	LC_ALL=sv_SE.UTF-8
 ENV	LANG=sv_SE.UTF-8
 ENV	LANGUAGE=sv_SE.UTF-8
-
-# install node for vim + nvim
-#WORKDIR /usr/local
-#RUN	curl -sL install-node.now.sh/lts > /tmp/node.sh && \
-#	chmod u+x /tmp/node.sh && \
-#	/tmp/node.sh --yes && \
-#	npm install --global yarn && \
-#	curl -LO https://github.com/neovim/neovim/releases/download/stable/nvim.appimage && \
-#	chmod u+x nvim.appimage && \
-#	./nvim.appimage --appimage-extract && \
-#	find /usr/local/squashfs-root -type d -exec chmod 755 {} ';'
 
 RUN	useradd -ms /bin/zsh dev
 USER	dev
