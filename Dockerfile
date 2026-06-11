@@ -1,24 +1,31 @@
-FROM    node:8.12.0
+FROM    node:24-trixie
 
 # setup to install basic development environment
-RUN     apt-get update && apt-get upgrade -y
-RUN     apt-get install -y locales locales-all less man vim jq zip rsync
+RUN     apt-get update && apt-get install -y --no-install-recommends \
+        awscli \
+        httpie \
+        jq \
+        less \
+        locales \
+        locales-all \
+        man \
+        python3 \
+        python3-pip \
+        python3-venv \
+        rsync \
+        vim \
+        zip \
+        && rm -rf /var/lib/apt/lists/*
 
 # set to swedish :)
 ENV     LC_ALL=sv_SE.UTF-8
 ENV     LANG=sv_SE.UTF-8
 ENV     LANGUAGE=sv_SE.UTF-8
 
-# setup to install AWS CLI
-RUN     apt-get install -y python python-pip python-virtualenv python-dev
-RUN     pip install awscli
 # create symbolic links; requires use of secrets
-RUN     mkdir ~/.aws && \
+RUN     mkdir -p ~/.aws && \
         ln -s /run/secrets/aws.config ~/.aws/config && \
         ln -s /run/secrets/aws.credentials ~/.aws/credentials
-
-# install httpie after AWS since it also uses python/pip
-RUN     pip install httpie
 
 # setup angular development; allow for optional local npm registry
 #ARG     REGISTRY=registry.npmjs.org

@@ -47,7 +47,7 @@ RUN set -eux; \
 # ---- Node.js (via NodeSource) ----
 # (Ubuntu 24.04 kan ligga efter i apt; NodeSource ger modern LTS)
 RUN set -eux; \
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -; \
+    curl -fsSL https://deb.nodesource.com/setup_24.x | bash -; \
     apt-get update; \
     apt-get install -y --no-install-recommends nodejs; \
     rm -rf /var/lib/apt/lists/*; \

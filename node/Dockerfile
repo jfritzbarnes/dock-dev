@@ -3,7 +3,7 @@ RUN	go get github.com/kryptco/kr ; echo 'ignore go install warning'
 WORKDIR /go/src/github.com/kryptco/kr
 RUN	make all
 
-FROM	node:20-bookworm
+FROM	node:24-trixie
 
 RUN	apt update && apt install -y \
 		awscli \

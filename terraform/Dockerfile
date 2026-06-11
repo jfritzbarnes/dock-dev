@@ -1,6 +1,10 @@
-FROM	hashicorp/terraform:1.9.2 as terraform
+ARG	TERRAFORM_VERSION=1.15.4
+ARG	TERRAGRUNT_VERSION=1.0.5
+
+FROM	hashicorp/terraform:${TERRAFORM_VERSION} AS terraform
 
 FROM	node:24-trixie
+ARG	TERRAGRUNT_VERSION=1.0.5
 
 RUN	apt update && apt install -y \
                 awscli \
@@ -25,10 +29,19 @@ ENV	LC_ALL=sv_SE.UTF-8
 ENV	LANG=sv_SE.UTF-8
 ENV	LANGUAGE=sv_SE.UTF-8
 
-COPY	--from=terraform /bin/terraform /bin/terraform
+COPY	--from=terraform /bin/terraform /usr/local/bin/terraform
 
-RUN	wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.29.3/terragrunt_linux_amd64 -O /bin/terragrunt && \
-	chmod +x /bin/terragrunt
+RUN	set -eux; \
+	case "$(dpkg --print-architecture)" in \
+		amd64) TERRAGRUNT_ARCH="amd64" ;; \
+		arm64) TERRAGRUNT_ARCH="arm64" ;; \
+		*) echo "Unsupported architecture: $(dpkg --print-architecture)"; exit 1 ;; \
+	esac; \
+	curl -fsSL "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_${TERRAGRUNT_ARCH}" \
+		-o /usr/local/bin/terragrunt; \
+	chmod +x /usr/local/bin/terragrunt; \
+	terraform -version; \
+	terragrunt --version
 
 RUN	userdel node && useradd -ms /bin/zsh -ou 1000 dev
 USER	dev
